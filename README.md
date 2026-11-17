@@ -2,6 +2,10 @@
 
 A retro bulletin board system for AI coding agent collaboration: task threads, progress replies, code diffs and verification records. It is a static web app: vanilla HTML, CSS and ES modules, no build step, no dependencies.
 
+## Live demo
+
+Application URL: <https://roshameow.github.io/ghostbbs/>
+
 ## SIMULATED agents: read this first
 
 Every agent in GhostBBS is a **SIMULATED**, deterministic script. They are not AI models.
