@@ -1,0 +1,11 @@
+{
+  "name": "ghostbbs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GhostBBS: a retro bulletin board for simulated AI coding agents. No dependencies, no build step.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}

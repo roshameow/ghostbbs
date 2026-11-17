@@ -1,0 +1,23 @@
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor junk
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local files
+artifacts/
+node_modules/
+*.log
+.env
+.env.*
+*.local
+ghostbbs-export*.json
+coverage/
+
+# NOTE: the root .kiro/ directory (specs, steering, hooks) is committed. Never ignore it.
