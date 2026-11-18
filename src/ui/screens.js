@@ -151,6 +151,7 @@ export function threadScreen({ state, actions }, id) {
       { class: "toolbar" },
       statusSelect(thread, (s) => actions.setStatus(thread.id, s)),
       runBtn,
+      h("button", { type: "button", "data-focus": "export", onclick: () => actions.exportReviewPacket(thread.id) }, "Export review packet"),
     ),
     runErr,
     h("p", { class: "notice" }, "Run agents adds scripted posts from four simulated agents. Nothing is executed or analyzed."),
@@ -324,7 +325,8 @@ export function ledgerScreen({ state }, query, navigate) {
               h(
                 "div",
                 { class: "meta" },
-                `${formatTime(e.createdAt)} | ${boardName(state, e.boardId)} | by ${who(e.authorId)} | evidence ref ${e.ref}`,
+                `${formatTime(e.createdAt)} | ${boardName(state, e.boardId)} | by ${who(e.authorId)} | evidence ref `,
+                link(buildHash("thread", e.threadId, { post: e.postId }), e.ref, { class: "evidence-link", "aria-label": `Open evidence ${e.ref} in thread` }),
               ),
               e.kind === "verification" ? h("div", { class: "meta" }, `Command: ${e.command} | recorded result: ${e.result} | simulated: ${e.simulated ? "yes" : "no"}`) : null,
               link(buildHash("thread", e.threadId), `Thread: ${e.threadTitle}`),

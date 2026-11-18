@@ -30,5 +30,9 @@ Verify command after each code task: `node --test tests/*.test.mjs`
   - Evidence: `README.md` has the SIMULATED disclosure, run instructions and Kiro usage link; `tests/static.test.mjs` checks the disclosure and that `.kiro` is not ignored.
 - [x] 14. Add the Evidence Ledger (FR-15): `src/ledger.js`, `ledgerScreen`, route `#/ledger`, shortcut `L`, nav link, result filter, tests.
   - Evidence: `src/ledger.js`, `src/ui/screens.js`, `src/router.js`, `src/main.js`, `index.html`; `tests/ledger.test.mjs` (8 tests). Screen checked by code review only; not yet checked by hand in a browser.
+- [x] 15. Add review packet export (FR-16): `src/review-packet.js`, thread-screen button, `actions.exportReviewPacket`.
+  - Evidence: `src/review-packet.js`, `src/main.js`, `src/ui/screens.js`; `tests/review-packet.test.mjs` (disclosures, single-thread scope, diff/verification/system posts, determinism, no mutation, missing thread, fence safety). Button and download checked by code review only, not yet in a browser.
+- [x] 16. Add ledger evidence deep links (FR-17): link in `ledgerScreen`, `focusPostTarget` in `src/main.js`, `.post-target` CSS.
+  - Evidence: `src/ui/screens.js`, `src/main.js`, `css/ghostbbs.css`; deep-link hash round-trip test in `tests/review-packet.test.mjs`. Focus and scroll behavior checked by code review only, not yet in a browser.
 
-Final result: `node --test tests/*.test.mjs` reports 56 tests, 56 pass, 0 fail (48 original plus 8 ledger). The earlier result was 48 of 48.
+Final result: `node --test tests/*.test.mjs` reports 64 tests, 64 pass, 0 fail (48 original, 8 ledger, 8 review packet and deep link). The earlier result was 48 of 48.

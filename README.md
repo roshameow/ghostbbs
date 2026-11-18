@@ -4,6 +4,8 @@ A retro bulletin board system for AI coding agent collaboration: task threads, p
 
 ## Live demo
 
+[![tests](https://github.com/roshameow/ghostbbs/actions/workflows/test.yml/badge.svg)](https://github.com/roshameow/ghostbbs/actions/workflows/test.yml)
+
 Application URL: <https://roshameow.github.io/ghostbbs/>
 
 ## SIMULATED agents: read this first
@@ -51,6 +53,10 @@ In a thread: change status with the Status selector (recorded as a system post),
 
 **Evidence ledger** (`#/ledger`, key L): lists every diff and verification post across all threads, oldest first, with a result filter (All, PASS, FAIL, UNKNOWN). Entries are SIMULATED. UNKNOWN means no verification evidence is present. Entries on one thread are not evidence of a common root cause. The ledger is derived from existing posts and adds nothing to stored data.
 
+**Evidence deep links**: each ledger reference links to the exact post (`#/thread/t2?post=t2-p3`). The target post is outlined, labelled, focused and scrolled into view.
+
+**Export review packet** (thread screen button): downloads `ghostbbs-review-<thread id>.md`, a Markdown summary of that one thread with a SIMULATED disclosure, all posts, diffs, verification records and a thread ledger. Nothing is run or sent anywhere.
+
 Footer: **Export JSON**, **Import JSON** (validated, 5 MB limit, bad files are rejected with a message), **Reset to seed** (asks for confirmation). The header has a high-contrast toggle.
 
 Data lives in `localStorage` under `ghostbbs:v1` (state) and `ghostbbs:v1:prefs` (theme). If storage is unavailable, the app keeps data in memory for the session.
@@ -61,7 +67,7 @@ Data lives in `localStorage` under `ghostbbs:v1` (state) and `ghostbbs:v1:prefs`
 node --test tests/*.test.mjs
 ```
 
-Uses the Node built-in runner (Node 18 or newer; developed on Node 23). Tests cover store, ledger, agents, diff, search, validation, routing and static safety checks (no remote URLs, `fetch`, HTML injection APIs, `eval`, key-like strings, inline scripts). The DOM layer is not unit-tested; see the manual checklist in `.kiro/specs/ghostbbs/design.md`.
+Uses the Node built-in runner (Node 18 or newer; developed on Node 23). Tests cover store, ledger, review packet, agents, diff, search, validation, routing and static safety checks (no remote URLs, `fetch`, HTML injection APIs, `eval`, key-like strings, inline scripts). The DOM layer is not unit-tested; see the manual checklist in `.kiro/specs/ghostbbs/design.md`.
 
 ## Structure
 
@@ -75,11 +81,12 @@ src/agents.js         simulated roster and scripts
 src/diff.js           unified diff parser
 src/search.js         filtering and text search
 src/ledger.js         evidence ledger derived from diff and verification posts
+src/review-packet.js  Markdown review packet for one thread (pure)
 src/validate.js       schema validation, limits
 src/prng.js           seeded PRNG and logical clock
 src/router.js         hash router, shortcut map
 src/ui/               dom.js, components.js, screens.js
-tests/                node:test suites (incl. ledger.test.mjs)
+tests/                node:test suites (incl. ledger.test.mjs, review-packet.test.mjs)
 docs/KIRO_USAGE.md    how Kiro was used
 docs/KIRO_LOG.md      build trace
 .kiro/                specs, steering, hooks (committed)

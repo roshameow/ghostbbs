@@ -62,11 +62,20 @@ Timestamps are ISO strings derived from a fixed base date plus the logical clock
 - diff: `parseUnified(text)` returns `[{type:"add"|"del"|"ctx"|"hunk"|"meta", text}]`.
 - search: `filterThreads(state, {text, boardId, status, agentId})`.
 - validate: `validateState(obj)` returns `{ok, errors}`. Checks types, enums, id uniqueness, size limits (max 5 MB text, 2,000 threads, 500 posts per thread).
+- review-packet: `buildReviewPacket(state, threadId)` returns Markdown for one thread.
 - router: hash-based routes so the app works from `file://`.
 
 ## Evidence Ledger
 
 `src/ledger.js` exports `buildLedger(state)`, `filterLedger(entries, outcome)`, `summarizeLedger(entries)`, `outcomeOfVerification(v)` and `evidenceRef(threadId, postId)`. It reads `state.threads[].posts[]` and returns new objects; it never mutates state and stores nothing, so the schema and validation enums are unchanged. A verification entry takes its own recorded result. A diff entry takes the result of the next verification post in the same thread, otherwise UNKNOWN. An unrecognized result is UNKNOWN. Sort key: createdAt, threadId, postId. This follows the append-only error-ledger pattern (append-only events, PASS/FAIL/UNKNOWN, evidence references) without a root-cause field. `ledgerScreen(ctx, query, navigate)` renders it with a labelled filter form, a status line with counts, and text outcome markers (`[+ PASS]`, `[x FAIL]`, `[? UNKNOWN]`). Filter state is in the hash query (`#/ledger?result=FAIL`).
+
+## Review Packet
+
+`src/review-packet.js` exports `buildReviewPacket(state, threadId)`: pure, no DOM, no network, no mutation. Posts are sorted by createdAt (stable). Multi-line user text goes in fenced `text` blocks whose fence is longer than any backtick run inside; single-line user values are collapsed and escaped. The ledger section calls `buildLedger({threads:[thread]})` and `summarizeLedger`. `actions.exportReviewPacket(id)` in `src/main.js` reuses a shared Blob `download` helper (also used by JSON export) and announces the result.
+
+## Evidence Deep Links
+
+Ledger references use `buildHash("thread", threadId, {post: postId})`. After render, `focusPostTarget(route)` in `src/main.js` reads `route.query.post`, finds `document.getElementById("post-" + id)` inside `#main`, adds `post-target`, sets `tabindex="-1"`, focuses and scrolls. Post ids already render as `id="post-<id>"` in `postItem`. Query values are only used as an id lookup, never as markup.
 
 ## UI Layout
 

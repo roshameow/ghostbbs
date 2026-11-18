@@ -1,6 +1,6 @@
 # How Kiro was used
 
-GhostBBS was built spec-first with **Kiro CLI 3.3.0**. Four Kiro sessions were used in this workspace. This page maps requirements to files and states what was and was not used. For a short timeline see [KIRO_LOG.md](KIRO_LOG.md).
+GhostBBS was built spec-first with **Kiro CLI 3.3.0**. Five Kiro sessions were used in this workspace. This page maps requirements to files and states what was and was not used. For a short timeline see [KIRO_LOG.md](KIRO_LOG.md).
 
 ## Sessions
 
@@ -8,6 +8,7 @@ GhostBBS was built spec-first with **Kiro CLI 3.3.0**. Four Kiro sessions were u
 2. Corrected the hook schema, implemented the application, wrote the test suites and ran the tests.
 3. Wrote the documentation.
 4. Added the Evidence Ledger: spec update (FR-15, design, task 14), `src/ledger.js`, UI wiring and `tests/ledger.test.mjs`.
+5. Added the review packet export (FR-16) and ledger evidence deep links (FR-17): spec, design and tasks update, `src/review-packet.js`, UI and CSS wiring, `tests/review-packet.test.mjs`. No persisted schema change.
 
 ## Spec-driven workflow
 
@@ -40,13 +41,15 @@ The spec lives in `.kiro/specs/ghostbbs/`: `requirements.md`, `design.md` and `t
 | FR-9 Search and filters | `src/search.js` | `tests/search.test.mjs` |
 | FR-10 Namespaced, versioned persistence with fallback | `src/store.js` (`ghostbbs:v1`), `src/validate.js` | `tests/store.test.mjs` (empty, corrupt, unknown version, throwing storage, reload) |
 | FR-15 Evidence ledger derived from posts, PASS/FAIL/UNKNOWN, no root-cause claim | `src/ledger.js`, `src/ui/screens.js`, `src/router.js` | `tests/ledger.test.mjs` |
+| FR-16 Review packet export, SIMULATED disclosure, no root-cause claim | `src/review-packet.js`, `src/main.js`, `src/ui/screens.js` | `tests/review-packet.test.mjs` |
+| FR-17 Evidence deep links to exact post | `src/ui/screens.js`, `src/main.js`, `css/ghostbbs.css`, `src/router.js` | `tests/review-packet.test.mjs` (hash round-trip); focus and scroll by code review only |
 | FR-12 Export and validated import | `src/store.js`, `src/validate.js`, `src/main.js` | `tests/store.test.mjs` (round-trip, invalid import), `tests/validate.test.mjs` (oversized, parseImport) |
 
 ## Test result
 
 Command: `node --test tests/*.test.mjs`
 
-Result: 56 tests, 56 pass, 0 fail. Per file: agents 8, diff 3, ledger 8, search 6, static 9, store 14, validate 8. The 48 tests before the ledger feature also passed.
+Result: 64 tests, 64 pass, 0 fail. Per file: agents 8, diff 3, ledger 8, review-packet 8, search 6, static 9, store 14, validate 8.
 
 ## Checked by the repository owner
 

@@ -252,3 +252,16 @@ kbd { border: 1px solid var(--border); padding: 0 0.4rem; }
 @media print {
   body { background: #fff; color: #000; }
 }
+
+/* Deep-link target: outline plus a dashed top edge, so it is not color-only. */
+.post-target {
+  outline: 3px solid var(--fg);
+  outline-offset: 2px;
+  border-left-style: double;
+  border-left-width: 10px;
+}
+.post-target::before {
+  content: ">> Linked evidence post";
+  display: block;
+  font-weight: bold;
+}

@@ -2,6 +2,7 @@
 
 import { createStore, createSafeStorage } from "./store.js";
 import { startRouter, shortcutFor, buildHash } from "./router.js";
+import { buildReviewPacket } from "./review-packet.js";
 import { LIMITS } from "./validate.js";
 import { replace } from "./ui/dom.js";
 import {
@@ -62,6 +63,11 @@ const actions = {
     }
     return r;
   },
+  exportReviewPacket(id) {
+    const name = `ghostbbs-review-${String(id).replace(/[^A-Za-z0-9_-]/g, "_")}.md`;
+    download(buildReviewPacket(store.getState(), id), name, "text/markdown");
+    announce(`Exported ${name}. Contents are SIMULATED demo data.`);
+  },
   runAgents(id) {
     const r = store.runAgents(id);
     if (r.ok) {
@@ -71,6 +77,30 @@ const actions = {
     return r;
   },
 };
+
+function download(text, filename, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function focusPostTarget(route) {
+  const postId = route.name === "thread" ? route.query.post : null;
+  if (typeof postId !== "string" || !postId) return false;
+  const el = document.getElementById(`post-${postId}`);
+  if (!el || !mainEl.contains(el)) return false;
+  el.classList.add("post-target");
+  el.setAttribute("tabindex", "-1");
+  el.focus();
+  el.scrollIntoView({ block: "center" });
+  return true;
+}
 
 function render(route, focusKey) {
   currentRoute = route;
@@ -93,6 +123,7 @@ function render(route, focusKey) {
   document.title = `${title ? title.textContent : "GhostBBS"} - GhostBBS`;
   const target =
     (focusKey && mainEl.querySelector(`[data-focus="${focusKey}"]:not([disabled])`)) || title;
+  if (!focusKey && focusPostTarget(route)) return;
   if (target && (focusKey || route.__navigated)) target.focus();
 }
 
@@ -126,15 +157,7 @@ function loadTheme() {
 
 // ---- data controls ----
 function exportData() {
-  const blob = new Blob([store.exportJson()], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "ghostbbs-export.json";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  download(store.exportJson(), "ghostbbs-export.json", "application/json");
   say("Exported ghostbbs-export.json.");
 }
 
