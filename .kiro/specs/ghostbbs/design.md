@@ -14,6 +14,7 @@ src/
   agents.js      simulated agent roster and deterministic scripts
   diff.js        unified diff parsing into line objects
   search.js      filtering and text search
+  ledger.js      evidence ledger derived from posts (pure)
   validate.js    schema validation for import and loaded state
   prng.js        small seeded PRNG (mulberry32)
   router.js      hash router (#/boards, #/thread/:id)
@@ -63,12 +64,16 @@ Timestamps are ISO strings derived from a fixed base date plus the logical clock
 - validate: `validateState(obj)` returns `{ok, errors}`. Checks types, enums, id uniqueness, size limits (max 5 MB text, 2,000 threads, 500 posts per thread).
 - router: hash-based routes so the app works from `file://`.
 
+## Evidence Ledger
+
+`src/ledger.js` exports `buildLedger(state)`, `filterLedger(entries, outcome)`, `summarizeLedger(entries)`, `outcomeOfVerification(v)` and `evidenceRef(threadId, postId)`. It reads `state.threads[].posts[]` and returns new objects; it never mutates state and stores nothing, so the schema and validation enums are unchanged. A verification entry takes its own recorded result. A diff entry takes the result of the next verification post in the same thread, otherwise UNKNOWN. An unrecognized result is UNKNOWN. Sort key: createdAt, threadId, postId. This follows the append-only error-ledger pattern (append-only events, PASS/FAIL/UNKNOWN, evidence references) without a root-cause field. `ledgerScreen(ctx, query, navigate)` renders it with a labelled filter form, a status line with counts, and text outcome markers (`[+ PASS]`, `[x FAIL]`, `[? UNKNOWN]`). Filter state is in the hash query (`#/ledger?result=FAIL`).
+
 ## UI Layout
 
 Terminal-style single column, max width about 80 characters.
 
 - Header: ASCII logo, persistent banner "Agents here are deterministic simulations, not real AI."
-- Nav (landmark): Menu, Boards, Search, Agents, About, plus keyboard hints (single-letter shortcuts, disabled while typing in inputs).
+- Nav (landmark): Menu, Boards, Search, Agents, Evidence ledger, About, plus keyboard hints (single-letter shortcuts, disabled while typing in inputs).
 - Main (landmark): current screen.
 - Thread view: title, status control, post list (`<ol>`), each post with author, SIMULATED badge, kind label, timestamp. Diff posts in `<pre>` with `+`/`-` markers. Verification posts as a labeled definition list. Buttons: "Run agents", "Add reply".
 - Footer: data controls (Export, Import, Reset), theme toggle (normal or high contrast).
@@ -87,6 +92,7 @@ Runner: `node --test tests/*.test.mjs` (Node built-in, no dependencies).
 - diff: parse add/del/context/hunk lines.
 - search: combined filters, case-insensitivity.
 - validate: accepts seed, rejects bad enums, duplicates, oversized data.
+- ledger: seed outcomes, deterministic ordering and tie-breaks, diff without verification is UNKNOWN, filter, no input mutation, route and shortcut.
 - static checks: a test greps `index.html`, `src/` and `css/` for `http://`, `https://` (except in documented non-fetching text), `fetch(`, `innerHTML`, `eval(` and for key-like strings.
 - manual checklist: keyboard-only pass, screen reader landmarks, offline load from `file://`, high-contrast mode, reload persistence.
 

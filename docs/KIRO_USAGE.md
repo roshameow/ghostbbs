@@ -1,37 +1,65 @@
 # How Kiro was used
 
-GhostBBS was built spec-first with **Kiro CLI 3.3.0**, signed in with the competition account. Two non-interactive Kiro sessions were used in this workspace: one created the specification, steering files and hook; the next corrected the hook schema, implemented the application, created the test suites, and ran `node --test tests/*.test.mjs`. The repository owner independently reran the 48 tests and performed browser checks afterward. This page lists what is in the repository and what each piece did; it does not claim anything beyond that.
+GhostBBS was built spec-first with **Kiro CLI 3.3.0**. Four Kiro sessions were used in this workspace. This page maps requirements to files and states what was and was not used. For a short timeline see [KIRO_LOG.md](KIRO_LOG.md).
+
+## Sessions
+
+1. Created the specification, steering files and the hook.
+2. Corrected the hook schema, implemented the application, wrote the test suites and ran the tests.
+3. Wrote the documentation.
+4. Added the Evidence Ledger: spec update (FR-15, design, task 14), `src/ledger.js`, UI wiring and `tests/ledger.test.mjs`.
 
 ## Spec-driven workflow
 
-The spec lives in `.kiro/specs/ghostbbs/`:
-
-| File | Purpose |
-| --- | --- |
-| `requirements.md` | User stories, functional and nonfunctional requirements, acceptance criteria, out-of-scope list |
-| `design.md` | Module layout, data model, UI layout, security notes, test strategy |
-| `tasks.md` | Ordered implementation tasks, each verified with `node --test tests/*.test.mjs` |
-
-The implementation follows `design.md` module for module (`store.js`, `agents.js`, `diff.js`, `search.js`, `validate.js`, `prng.js`, `router.js`, `seed.js`, `ui/*`). Scope changes go into the spec first.
+The spec lives in `.kiro/specs/ghostbbs/`: `requirements.md`, `design.md` and `tasks.md`. `tasks.md` has every task checked with an evidence note. The implementation follows the module layout in `design.md`.
 
 ## Steering
 
-`.kiro/steering/tech.md` and `.kiro/steering/product.md` are always-included context for the agent. They fix the stack (vanilla ES modules, no network calls, `textContent` only, deterministic agents) and the product rules (agents labeled SIMULATED, synthetic data, accessibility as a requirement).
+`.kiro/steering/tech.md` and `.kiro/steering/product.md` fix the stack (vanilla ES modules, no network calls, `textContent` only, deterministic agents) and the product rules (agents labeled SIMULATED, synthetic data, accessibility).
 
 ## Hook
 
-`.kiro/hooks/verify-tests.json` uses the v1 hook format:
+`.kiro/hooks/verify-tests.json` was first written with an invalid schema. It was corrected to the v1 schema:
 
+- `"version": "v1"`
 - trigger `PostFileSave`
-- matcher regex for `src/**/*.js`, `tests/**/*.mjs` and `index.html`
+- matcher regex for `src/*.js`, `tests/*.mjs` and `index.html`
 - action type `command`, running `node --test tests/*.test.mjs`
+
+`tests/static.test.mjs` includes a test that the hook uses the v1 schema and the exact test command.
+
+## Requirements to source and tests
+
+| Requirement | Source | Tests |
+| --- | --- | --- |
+| FR-4 Simulated roster, four roles, SIMULATED badge | `src/agents.js`, `src/ui/components.js` | `tests/agents.test.mjs` (roster), `tests/validate.test.mjs` (rejects non-simulated agents) |
+| FR-5 Deterministic Run agents | `src/agents.js`, `src/prng.js`, `src/store.js` | `tests/agents.test.mjs` (reproducible, script order, resume), `tests/store.test.mjs` (runAgents), `tests/static.test.mjs` (no `Math.random`/`Date.now` in agent logic) |
+| FR-6 Diff posts with `+`/`-` markers | `src/diff.js`, `src/ui/components.js` | `tests/diff.test.mjs` |
+| FR-7 Verification records, never executed | `src/agents.js`, `src/validate.js`, `src/ui/components.js` | `tests/validate.test.mjs` (rejects non-simulated records) |
+| FR-8 Status change as system post | `src/store.js` | `tests/store.test.mjs` (setStatus) |
+| FR-9 Search and filters | `src/search.js` | `tests/search.test.mjs` |
+| FR-10 Namespaced, versioned persistence with fallback | `src/store.js` (`ghostbbs:v1`), `src/validate.js` | `tests/store.test.mjs` (empty, corrupt, unknown version, throwing storage, reload) |
+| FR-15 Evidence ledger derived from posts, PASS/FAIL/UNKNOWN, no root-cause claim | `src/ledger.js`, `src/ui/screens.js`, `src/router.js` | `tests/ledger.test.mjs` |
+| FR-12 Export and validated import | `src/store.js`, `src/validate.js`, `src/main.js` | `tests/store.test.mjs` (round-trip, invalid import), `tests/validate.test.mjs` (oversized, parseImport) |
+
+## Test result
+
+Command: `node --test tests/*.test.mjs`
+
+Result: 56 tests, 56 pass, 0 fail. Per file: agents 8, diff 3, ledger 8, search 6, static 9, store 14, validate 8. The 48 tests before the ledger feature also passed.
+
+## Checked by the repository owner
+
+The repository owner independently reran the tests and did the manual browser checks on the static HTTP server: keyboard-only use, reload persistence, malformed-import rejection and high-contrast mode. The repository owner also published the repository. Chrome blocks ES modules on `file://`, so `file://` operation is not verified in all browsers.
 
 ## Not used
 
-- No MCP servers are configured or used.
-- No property-based testing is implemented. Tests are example-based `node:test` suites.
-- The app has no Kiro or LLM dependency at runtime. Its agents are fixed scripts.
+- No MCP servers.
+- No custom agents.
+- No property-based testing. Tests are example-based `node:test` suites.
+- No Kiro powers.
+- No runtime LLM calls. The app's agents are fixed scripts.
 
 ## Committed
 
-The whole `.kiro/` directory is part of the repository and is not listed in `.gitignore`.
+The whole `.kiro/` directory is committed and is not in `.gitignore`.

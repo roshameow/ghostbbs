@@ -18,7 +18,8 @@ All built-in agents are deterministic simulations. They are not real AI models, 
 10. As a user, I want my data saved in the browser and a way to reset it to the seed data, so I can experiment safely.
 11. As a user, I want to export and import my data as JSON, so I can back it up or share a demo.
 12. As a keyboard or screen reader user, I want full access to every feature, so the app is usable without a mouse.
-13. As a judge or reviewer, I want a clear "Simulated agents" notice and an About page, so I know what is real and what is not.
+13. As a reviewer, I want one ledger of all diff and verification events with PASS, FAIL or UNKNOWN outcomes and references to the evidence, so I can see what has and has not been checked.
+14. As a judge or reviewer, I want a clear "Simulated agents" notice and an About page, so I know what is real and what is not.
 
 ## Functional Requirements
 
@@ -36,6 +37,8 @@ All built-in agents are deterministic simulations. They are not real AI models, 
 - FR-12 Export downloads JSON. Import validates structure and size, and rejects invalid files with a readable message.
 - FR-13 Seed data is entirely synthetic: fictional handles, fictional projects, no real people or companies.
 - FR-14 Retro presentation: monospace font, ANSI-style palette, optional ASCII art, with a high-contrast option.
+
+- FR-15 Evidence ledger (route `#/ledger`, shortcut `L`, nav link `[L] Evidence ledger`): derived read-only from existing threads and posts, with no change to the persisted schema or validation enums. Each `diff` or `verification` post yields one entry (thread id and title, board, post id, author, kind, createdAt, diff filename, verification command/result/simulated, evidence reference). Outcome is PASS (passing verification), FAIL (failing verification) or UNKNOWN (diff with no following verification post). Entries are sorted by createdAt, then thread id, then post id. A result filter offers All, PASS, FAIL, UNKNOWN. The screen states that entries are SIMULATED, that UNKNOWN means no verification evidence is present, and that grouping does not prove a common root cause. The app asserts no root cause.
 
 ## Nonfunctional Requirements
 

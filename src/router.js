@@ -23,6 +23,7 @@ export function parseHash(hash) {
     case "new": return { name: "new", params: {}, query };
     case "search": return { name: "search", params: {}, query };
     case "agents": return { name: "agents", params: {}, query };
+    case "ledger": return { name: "ledger", params: {}, query };
     case "about": return { name: "about", params: {}, query };
     default: return { name: "notfound", params: {}, query };
   }
@@ -46,6 +47,7 @@ const SHORTCUTS = {
   n: { type: "nav", hash: "#/new" },
   s: { type: "nav", hash: "#/search" },
   a: { type: "nav", hash: "#/agents" },
+  l: { type: "nav", hash: "#/ledger" },
   "?": { type: "nav", hash: "#/about" },
   t: { type: "theme" },
 };
@@ -56,6 +58,7 @@ export const SHORTCUT_HELP = [
   ["N", "New thread"],
   ["S", "Search"],
   ["A", "Agent roster"],
+  ["L", "Evidence ledger"],
   ["?", "About"],
   ["T", "Toggle high contrast"],
 ];

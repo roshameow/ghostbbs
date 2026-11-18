@@ -8,6 +8,7 @@ import { filterThreads } from "../search.js";
 import { buildHash, SHORTCUT_HELP } from "../router.js";
 import { STATUSES } from "../validate.js";
 import { SCRIPT_LENGTH } from "../agents.js";
+import { buildLedger, filterLedger, summarizeLedger, OUTCOMES } from "../ledger.js";
 
 const link = (hash, text, attrs) => h("a", { href: hash, ...(attrs || {}) }, text);
 
@@ -54,6 +55,7 @@ export function menuScreen({ state, status }) {
     ["#/new", "N", "New thread"],
     ["#/search", "S", "Search threads"],
     ["#/agents", "A", "Agent roster (simulated)"],
+    ["#/ledger", "L", "Evidence ledger (simulated)"],
     ["#/about", "?", "About GhostBBS"],
   ];
   return h(
@@ -264,6 +266,71 @@ export function agentsScreen({ state }) {
         ),
       ),
     ),
+  );
+}
+
+const OUTCOME_SYMBOLS = { PASS: "+", FAIL: "x", UNKNOWN: "?" };
+
+export function ledgerScreen({ state }, query, navigate) {
+  const all = buildLedger(state);
+  const counts = summarizeLedger(all);
+  const current = query && OUTCOMES.includes(query.result) ? query.result : "ALL";
+  const entries = filterLedger(all, current);
+  const agentsById = new Map(state.agents.map((a) => [a.id, a]));
+  const who = (id) => (agentsById.has(id) ? agentsById.get(id).handle : id);
+  const select = h(
+    "select",
+    { id: "l-result", name: "result" },
+    ["ALL", ...OUTCOMES].map((o) => h("option", { value: o, selected: o === current }, o === "ALL" ? "All" : o)),
+  );
+  return h(
+    "section",
+    { "aria-labelledby": "screen-title" },
+    screenTitle("Evidence Ledger"),
+    h(
+      "div",
+      { class: "notice" },
+      h("p", null, simBadge(), " Every entry is SIMULATED, illustrative data. The app never runs commands or checks real code."),
+      h("p", null, "UNKNOWN means no verification evidence is present for that entry. It is not a pass and not a failure."),
+      h("p", null, "The ledger is append-only history derived from thread posts. Entries on the same thread are listed together by reference only. Grouping does not prove a common root cause."),
+    ),
+    h(
+      "form",
+      {
+        class: "toolbar",
+        onsubmit: (e) => {
+          e.preventDefault();
+          navigate(buildHash("ledger", null, select.value === "ALL" ? {} : { result: select.value }));
+        },
+      },
+      h("div", { class: "field" }, h("label", { for: "l-result" }, "Result filter"), select),
+      h("button", { type: "submit" }, "Apply filter"),
+    ),
+    h("p", { role: "status", class: "meta" }, `${entries.length} of ${all.length} entries shown. PASS ${counts.PASS}, FAIL ${counts.FAIL}, UNKNOWN ${counts.UNKNOWN}.`),
+    entries.length === 0
+      ? h("p", { class: "empty" }, "No ledger entries match.")
+      : h(
+          "ol",
+          { class: "thread-list ledger" },
+          entries.map((e) =>
+            h(
+              "li",
+              null,
+              h("strong", null, `[${OUTCOME_SYMBOLS[e.outcome]} ${e.outcome}]`),
+              " ",
+              e.kind === "diff" ? `Diff ${e.filename || "(unnamed)"}` : "Verification record",
+              " ",
+              simBadge(),
+              h(
+                "div",
+                { class: "meta" },
+                `${formatTime(e.createdAt)} | ${boardName(state, e.boardId)} | by ${who(e.authorId)} | evidence ref ${e.ref}`,
+              ),
+              e.kind === "verification" ? h("div", { class: "meta" }, `Command: ${e.command} | recorded result: ${e.result} | simulated: ${e.simulated ? "yes" : "no"}`) : null,
+              link(buildHash("thread", e.threadId), `Thread: ${e.threadTitle}`),
+            ),
+          ),
+        ),
   );
 }
 

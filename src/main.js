@@ -6,7 +6,7 @@ import { LIMITS } from "./validate.js";
 import { replace } from "./ui/dom.js";
 import {
   menuScreen, boardsScreen, boardScreen, threadScreen, newThreadScreen,
-  searchScreen, agentsScreen, aboutScreen, notFoundScreen,
+  searchScreen, agentsScreen, ledgerScreen, aboutScreen, notFoundScreen,
 } from "./ui/screens.js";
 
 const PREFS_KEY = "ghostbbs:v1:prefs";
@@ -84,6 +84,7 @@ function render(route, focusKey) {
     case "new": node = newThreadScreen(ctx, route.query); break;
     case "search": node = searchScreen(ctx, route.query, navigate); break;
     case "agents": node = agentsScreen(ctx); break;
+    case "ledger": node = ledgerScreen(ctx, route.query, navigate); break;
     case "about": node = aboutScreen(ctx); break;
     default: node = notFoundScreen();
   }
